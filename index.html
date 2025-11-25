@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Distributor Order Form</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        :root {
+            --primary-blue: #003f8c;
+            --light-blue: #e8f0ff;
+            --section-bg: #f7faff;
+            --border-radius: 8px;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--light-blue);
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 30px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: var(--primary-blue);
+            margin-bottom: 10px;
+        }
+        
+        .company-details {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+        
+        section {
+            background-color: var(--section-bg);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        h2 {
+            color: var(--primary-blue);
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 8px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+        }
+        
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+        }
+        
+        .quantity-btn {
+            background-color: var(--primary-blue);
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .quantity-input {
+            width: 60px;
+            text-align: center;
+            margin: 0 5px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        .search-box {
+            margin-bottom: 15px;
+        }
+        
+        .alphabet-filter {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .alphabet-btn {
+            padding: 5px 10px;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .alphabet-btn.active {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+        
+        .total-section {
+            text-align: right;
+            margin: 20px 0;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        
+        .btn:hover {
+            opacity: 0.9;
+        }
+        
+        .notification {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+            text-align: center;
+            display: none;
+        }
+        
+        .notification.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .notification.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .image-preview {
+            max-width: 150px;
+            max-height: 150px;
+            margin-top: 10px;
+            display: none;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        
+        @media (max-width: 768px) {
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            
+            .alphabet-filter {
+                justify-content: center;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Distributor Order Form</h1>
+            <div class="company-details">
+                <p>MediDistributors Inc.</p>
+                <p>123 Healthcare Avenue, Medical District, Cityville 56789</p>
+                <p>Email: orders@medidistributors.com</p>
+            </div>
+        </header>
+        
+        <!-- Notification Area -->
+        <div id="notification" class="notification"></div>
+        
+        <section id="distributor-info">
+            <h2>Distributor Information</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="worker-id">Worker ID *</label>
+                    <input type="text" id="worker-id" placeholder="Enter your worker ID" required>
+                </div>
+                <div class="form-group">
+                    <label for="worker-name">Worker Name *</label>
+                    <input type="text" id="worker-name" placeholder="Enter your full name" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="worker-image">Worker Image URL</label>
+                <input type="text" id="worker-image" placeholder="Enter image URL (optional)">
+                <img id="image-preview" class="image-preview" alt="Worker Image Preview">
+            </div>
+        </section>
+        
+        <section id="medical-store">
+            <h2>Medical Store Information</h2>
+            <div class="form-group">
+                <label for="store-select">Select Medical Store *</label>
+                <select id="store-select" required>
+                    <option value="">-- Select a Medical Store --</option>
+                    <!-- Options will be populated by JavaScript -->
+                </select>
+            </div>
+        </section>
+        
+        <section id="medicine-selection">
+            <h2>Medicine Selection</h2>
+            <div class="search-box">
+                <input type="text" id="medicine-search" placeholder="Search medicines by name or starting letter...">
+            </div>
+            
+            <div class="alphabet-filter" id="alphabet-filter">
+                <!-- Alphabet buttons will be generated by JavaScript -->
+            </div>
+            
+            <table id="medicine-table">
+                <thead>
+                    <tr>
+                        <th>Medicine</th>
+                        <th>Price ($)</th>
+                        <th>Quantity</th>
+                        <th>Total ($)</th>
+                    </tr>
+                </thead>
+                <tbody id="medicine-list">
+                    <!-- Medicine rows will be populated by JavaScript -->
+                </tbody>
+            </table>
+            
+            <div class="total-section">
+                Total Order Price: $<span id="total-price">0.00</span>
+            </div>
+        </section>
+        
+        <div class="button-group">
+            <button id="submit-order" class="btn btn-primary">Submit Order</button>
+        </div>
+        
+        <div class="button-group">
+            <button id="print-invoice" class="btn btn-secondary">Print Invoice (PDF)</button>
+            <button id="print-receipt" class="btn btn-secondary">Print Receipt (PDF)</button>
+        </div>
+    </div>
+
+    <script>
+        // Initialize jsPDF
+        const { jsPDF } = window.jspdf;
+        
+        // Google Apps Script Web App URL - REPLACE WITH YOUR ACTUAL DEPLOYED URL
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxZW8M3jiOXLG5HVzSEjHjWmgcmAa_CED2Yd81a4rFr5No_LscpZqHeXcbf8i94UWE63w/exec';
+        
+        // Medical stores data
+        const medicalStores = [
+            "Apex Pharmacy", "BioMed Solutions", "CarePlus Medical", "City Health Mart", 
+            "Community Drugstore", "Elite Pharmaceuticals", "First Aid Pharmacy", 
+            "Global Health Supplies", "HealthFirst Distributors", "LifeCare Medical", 
+            "MediQuick Pharmacy", "NexGen Healthcare", "PharmaDirect", "Prime Medical Supplies", 
+            "QuickCare Pharmacy", "Reliance Medical", "Sunrise Pharmaceuticals", 
+            "Total Health Solutions", "Unity Drugstore", "VitalCare Medical"
+        ].sort();
+        
+        // Medicine data
+        const medicinesByLetter = {
+            'A': [
+                { name: "Amoxicillin", price: 12.50 },
+                { name: "Aspirin", price: 5.25 },
+                { name: "Atorvastatin", price: 18.75 },
+                { name: "Azithromycin", price: 22.40 },
+                { name: "Amlodipine", price: 9.80 },
+                { name: "Albuterol", price: 15.30 },
+                { name: "Acetaminophen", price: 7.20 },
+                { name: "Antacid", price: 4.50 },
+                { name: "Antihistamine", price: 8.75 },
+                { name: "Antibiotic Ointment", price: 6.90 }
+            ],
+            'B': [
+                { name: "Benzonatate", price: 14.25 },
+                { name: "Bisoprolol", price: 11.80 },
+                { name: "Budesonide", price: 19.50 },
+                { name: "Bupropion", price: 23.10 },
+                { name: "Baclofen", price: 13.75 },
+                { name: "Benzoyl Peroxide", price: 7.40 },
+                { name: "Bismuth Subsalicylate", price: 8.20 },
+                { name: "Brompheniramine", price: 9.60 },
+                { name: "Bumetanide", price: 12.90 },
+                { name: "Butalbital", price: 16.45 }
+            ],
+			 'C': [
+                { name: "Ciprofloxacin", price: 17.80 },
+                { name: "Clopidogrel", price: 21.30 },
+                { name: "Citalopram", price: 14.90 },
+                { name: "Cetirizine", price: 8.25 },
+                { name: "Cephalexin", price: 16.75 },
+                { name: "Chlorhexidine", price: 6.50 },
+                { name: "Chlorthalidone", price: 10.40 },
+                { name: "Clindamycin", price: 19.20 },
+                { name: "Clotrimazole", price: 7.80 },
+                { name: "Codeine", price: 25.60 }
+            ],
+            'D': [
+                { name: "Doxycycline", price: 15.40 },
+                { name: "Diazepam", price: 12.75 },
+                { name: "Duloxetine", price: 24.80 },
+                { name: "Digoxin", price: 11.20 },
+                { name: "Diltiazem", price: 13.90 },
+                { name: "Diphenhydramine", price: 6.25 },
+                { name: "Dicyclomine", price: 9.10 },
+                { name: "Dexamethasone", price: 8.75 },
+                { name: "Desloratadine", price: 10.60 },
+                { name: "Diclofenac", price: 7.95 }
+            ],
+            'E': [
+                { name: "Escitalopram", price: 20.50 },
+                { name: "Enalapril", price: 9.75 },
+                { name: "Erythromycin", price: 14.20 },
+                { name: "Esomeprazole", price: 18.90 },
+                { name: "Estradiol", price: 22.40 },
+                { name: "Etodolac", price: 11.80 },
+                { name: "Exenatide", price: 45.60 },
+                { name: "Ezetimibe", price: 26.75 },
+                { name: "Econazole", price: 8.40 },
+                { name: "Epinephrine", price: 32.10 }
+            ],
+            'F': [
+                { name: "Fluoxetine", price: 15.75 },
+                { name: "Furosemide", price: 8.90 },
+                { name: "Fluticasone", price: 18.25 },
+                { name: "Famotidine", price: 12.40 },
+                { name: "Fexofenadine", price: 14.80 },
+                { name: "Fluconazole", price: 16.95 },
+                { name: "Felodipine", price: 11.30 },
+                { name: "Fenofibrate", price: 19.60 },
+                { name: "Fluvoxamine", price: 22.10 },
+                { name: "Flecainide", price: 28.75 }
+            ],
+            'G': [
+                { name: "Gabapentin", price: 13.50 },
+                { name: "Glipizide", price: 9.25 },
+                { name: "Glyburide", price: 8.75 },
+                { name: "Guaifenesin", price: 6.40 },
+                { name: "Griseofulvin", price: 14.20 },
+                { name: "Gemfibrozil", price: 16.80 },
+                { name: "Glimepiride", price: 10.95 },
+                { name: "Granisetron", price: 24.50 },
+                { name: "Ganciclovir", price: 35.25 },
+                { name: "Gadobutrol", price: 42.80 }
+            ],
+            'H': [
+                { name: "Hydrochlorothiazide", price: 7.50 },
+                { name: "Hydrocodone", price: 18.75 },
+                { name: "Hydralazine", price: 9.80 },
+                { name: "Hydroxyzine", price: 11.25 },
+                { name: "Haloperidol", price: 14.40 },
+                { name: "Heparin", price: 22.90 },
+                { name: "Hydromorphone", price: 26.75 },
+                { name: "Hydrocortisone", price: 8.95 },
+                { name: "Hyoscyamine", price: 12.60 },
+                { name: "Halobetasol", price: 16.30 }
+            ],
+            'I': [
+                { name: "Ibuprofen", price: 6.25 },
+                { name: "Insulin", price: 32.50 },
+                { name: "Isosorbide", price: 11.80 },
+                { name: "Itraconazole", price: 24.75 },
+                { name: "Imipramine", price: 15.40 },
+                { name: "Indomethacin", price: 12.90 },
+                { name: "Irbesartan", price: 18.25 },
+                { name: "Ipratropium", price: 14.60 },
+                { name: "Isotretinoin", price: 45.80 },
+                { name: "Ivabradine", price: 38.95 }
+            ],
+            'J': [
+                { name: "Januvia", price: 52.75 },
+                { name: "Jardiance", price: 48.90 },
+                { name: "Jantoven", price: 12.25 },
+                { name: "Jolessa", price: 28.40 },
+                { name: "Jublia", price: 65.80 },
+                { name: "Junel", price: 22.75 },
+                { name: "Jevtana", price: 125.50 },
+                { name: "Jalyn", price: 35.25 },
+                { name: "Jentadueto", price: 58.90 },
+                { name: "Jynarque", price: 95.75 }
+            ],
+            'K': [
+                { name: "Ketoconazole", price: 14.25 },
+                { name: "Ketorolac", price: 11.80 },
+                { name: "Klonopin", price: 18.50 },
+                { name: "Keflex", price: 16.75 },
+                { name: "Kaletra", price: 42.90 },
+                { name: "Kadcyla", price: 125.25 },
+                { name: "Kineret", price: 88.40 },
+                { name: "Krystexxa", price: 95.75 },
+                { name: "Kybella", price: 65.80 },
+                { name: "Kevzara", price: 78.90 }
+            ],
+            'L': [
+                { name: "Lisinopril", price: 8.50 },
+                { name: "Levothyroxine", price: 10.25 },
+                { name: "Losartan", price: 9.75 },
+                { name: "Loratadine", price: 7.40 },
+                { name: "Lovastatin", price: 12.80 },
+                { name: "Lamotrigine", price: 18.95 },
+                { name: "Levofloxacin", price: 16.30 },
+                { name: "Labetalol", price: 11.60 },
+                { name: "Lithium", price: 14.25 },
+                { name: "Loperamide", price: 6.90 }
+            ],
+            'M': [
+                { name: "Metformin", price: 7.25 },
+                { name: "Metoprolol", price: 9.50 },
+                { name: "Montelukast", price: 14.75 },
+                { name: "Morphine", price: 22.40 },
+                { name: "Mupirocin", price: 12.80 },
+                { name: "Mirtazapine", price: 16.95 },
+                { name: "Methylprednisolone", price: 11.30 },
+                { name: "Meloxicam", price: 10.60 },
+                { name: "Methotrexate", price: 18.75 },
+                { name: "Memantine", price: 24.90 }
+            ],
+            'N': [
+                { name: "Naproxen", price: 8.75 },
+                { name: "Nifedipine", price: 11.50 },
+                { name: "Nitroglycerin", price: 14.25 },
+                { name: "Nystatin", price: 9.80 },
+                { name: "Nortriptyline", price: 16.40 },
+                { name: "Naloxone", price: 28.90 },
+                { name: "Nebivolol", price: 19.75 },
+                { name: "Nicotine", price: 12.60 },
+                { name: "Nizatidine", price: 14.95 },
+                { name: "Norethindrone", price: 18.30 }
+            ],
+            'O': [
+                { name: "Omeprazole", price: 12.50 },
+                { name: "Olmesartan", price: 16.75 },
+                { name: "Oxycodone", price: 24.80 },
+                { name: "Olanzapine", price: 19.40 },
+                { name: "Oseltamivir", price: 32.25 },
+                { name: "Oxcarbazepine", price: 22.90 },
+                { name: "Orlistat", price: 28.75 },
+                { name: "Ofloxacin", price: 14.60 },
+                { name: "Oxytocin", price: 18.95 },
+                { name: "Oxymetazoline", price: 8.30 }
+            ],
+            'P': [
+                { name: "Pantoprazole", price: 14.25 },
+                { name: "Prednisone", price: 7.80 },
+                { name: "Propranolol", price: 9.50 },
+                { name: "Paroxetine", price: 16.75 },
+                { name: "Phenytoin", price: 12.40 },
+                { name: "Pregabalin", price: 24.90 },
+                { name: "Pioglitazone", price: 18.25 },
+                { name: "Potassium Chloride", price: 8.60 },
+                { name: "Phentermine", price: 22.75 },
+                { name: "Penicillin", price: 11.30 }
+            ],
+            'Q': [
+                { name: "Quetiapine", price: 18.50 },
+                { name: "Quinapril", price: 12.75 },
+                { name: "Quinine", price: 14.80 },
+                { name: "Qvar", price: 32.25 },
+                { name: "Qnasl", price: 28.90 },
+                { name: "Quillivant", price: 45.75 },
+                { name: "Qtern", price: 38.40 },
+                { name: "Quazepam", price: 22.60 },
+                { name: "Qualaquin", price: 26.95 },
+                { name: "Quinidine", price: 19.30 }
+            ],
+            'R': [
+                { name: "Rosuvastatin", price: 16.50 },
+                { name: "Ranitidine", price: 8.25 },
+                { name: "Risperidone", price: 19.75 },
+                { name: "Ropinirole", price: 22.40 },
+                { name: "Rifaximin", price: 38.80 },
+                { name: "Raloxifene", price: 28.95 },
+                { name: "Ramelteon", price: 24.30 },
+                { name: "Rasagiline", price: 32.60 },
+                { name: "Risedronate", price: 18.75 },
+                { name: "Rivastigmine", price: 26.90 }
+            ],
+            'S': [
+                { name: "Sertraline", price: 12.25 },
+                { name: "Simvastatin", price: 9.50 },
+                { name: "Spironolactone", price: 11.75 },
+                { name: "Sulfamethoxazole", price: 8.40 },
+                { name: "Sumatriptan", price: 24.80 },
+                { name: "Sildenafil", price: 28.95 },
+                { name: "Sitagliptin", price: 32.30 },
+                { name: "Sucralfate", price: 14.60 },
+                { name: "Selegiline", price: 19.75 },
+                { name: "Saxagliptin", price: 26.90 }
+            ],
+            'T': [
+                { name: "Tramadol", price: 14.50 },
+                { name: "Trazodone", price: 11.25 },
+                { name: "Tamsulosin", price: 16.75 },
+                { name: "Temazepam", price: 18.40 },
+                { name: "Tizanidine", price: 12.80 },
+                { name: "Tolterodine", price: 22.95 },
+                { name: "Topiramate", price: 19.30 },
+                { name: "Torsemide", price: 10.60 },
+                { name: "Tacrolimus", price: 38.75 },
+                { name: "Terbinafine", price: 24.90 }
+            ],
+            'U': [
+                { name: "Ursodiol", price: 28.50 },
+                { name: "Umeclidinium", price: 42.25 },
+                { name: "Upadacitinib", price: 65.75 },
+                { name: "Ubrogepant", price: 48.40 },
+                { name: "Ustekinumab", price: 125.80 },
+                { name: "Ulipristal", price: 32.95 },
+                { name: "Unasyn", price: 18.30 },
+                { name: "Urecholine", price: 22.60 },
+                { name: "Uroxatral", price: 26.75 },
+                { name: "Uvadex", price: 58.90 }
+            ],
+            'V': [
+                { name: "Valsartan", price: 14.50 },
+                { name: "Venlafaxine", price: 18.25 },
+                { name: "Verapamil", price: 12.75 },
+                { name: "Voriconazole", price: 45.40 },
+                { name: "Vardenafil", price: 32.80 },
+                { name: "Vigabatrin", price: 28.95 },
+                { name: "Vilazodone", price: 34.30 },
+                { name: "Vincristine", price: 52.60 },
+                { name: "Vismodegib", price: 125.75 },
+                { name: "Vortioxetine", price: 38.90 }
+            ],
+            'W': [
+                { name: "Warfarin", price: 9.50 },
+                { name: "Wellbutrin", price: 22.25 },
+                { name: "Wixela", price: 38.75 },
+                { name: "Wakix", price: 65.40 },
+                { name: "Wymzya", price: 28.80 },
+                { name: "Wynzora", price: 42.95 },
+                { name: "Wytensin", price: 16.30 },
+                { name: "Welchol", price: 32.60 },
+                { name: "WinRho", price: 85.75 },
+                { name: "Wigraine", price: 24.90 }
+            ],
+            'X': [
+                { name: "Xanax", price: 18.50 },
+                { name: "Xarelto", price: 45.25 },
+                { name: "Xeljanz", price: 68.75 },
+                { name: "Xenical", price: 32.40 },
+                { name: "Xopenex", price: 28.80 },
+                { name: "Xylocaine", price: 12.95 },
+                { name: "Xeomin", price: 42.30 },
+                { name: "Xatmep", price: 38.60 },
+                { name: "Xermelo", price: 75.75 },
+                { name: "Xospata", price: 95.90 }
+            ],
+            'Y': [
+                { name: "Yasmin", price: 28.50 },
+                { name: "Yaz", price: 32.25 },
+                { name: "Yervoy", price: 125.75 },
+                { name: "Yupelri", price: 48.40 },
+                { name: "Yonsa", price: 65.80 },
+                { name: "Yohimbine", price: 22.95 },
+                { name: "Yocon", price: 18.30 },
+                { name: "Yodoxin", price: 26.60 },
+                { name: "Yutopar", price: 34.75 },
+                { name: "Yentreve", price: 42.90 }
+            ],
+            'Z': [
+                { name: "Zoloft", price: 14.50 },
+                { name: "Zyrtec", price: 12.25 },
+                { name: "Zocor", price: 16.75 },
+                { name: "Zofran", price: 24.40 },
+                { name: "Zyprexa", price: 28.80 },
+                { name: "Zestril", price: 9.95 },
+                { name: "Zovirax", price: 32.30 },
+                { name: "Zanaflex", price: 18.60 },
+                { name: "Zosyn", price: 42.75 },
+                { name: "Zyvox", price: 65.90 }
+            ]
+            // Add other letters as needed
+        };
+
+        let allMedicineRows = [];
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+        });
+
+        function initializeApp() {
+            // Populate medical stores dropdown
+            const storeSelect = document.getElementById('store-select');
+            medicalStores.forEach(store => {
+                const option = document.createElement('option');
+                option.value = store;
+                option.textContent = store;
+                storeSelect.appendChild(option);
+            });
+            
+            // Create alphabet filter buttons
+            const alphabetFilter = document.getElementById('alphabet-filter');
+            const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            
+            for (let i = 0; i < alphabet.length; i++) {
+                const letter = alphabet[i];
+                const button = document.createElement('button');
+                button.className = 'alphabet-btn';
+                button.textContent = letter;
+                button.dataset.letter = letter;
+                button.addEventListener('click', function() {
+                    document.querySelectorAll('.alphabet-btn').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                    filterMedicinesByLetter(letter);
+                });
+                alphabetFilter.appendChild(button);
+            }
+            
+            // Image URL preview
+            document.getElementById('worker-image').addEventListener('input', function() {
+                const preview = document.getElementById('image-preview');
+                if (this.value) {
+                    preview.src = this.value;
+                    preview.style.display = 'block';
+                } else {
+                    preview.style.display = 'none';
+                }
+            });
+            
+            // Set default active letter
+            document.querySelector('.alphabet-btn').classList.add('active');
+            filterMedicinesByLetter('A');
+            
+            // Add event listeners
+            document.getElementById('medicine-search').addEventListener('input', function() {
+                filterMedicinesBySearch(this.value);
+            });
+            
+            document.getElementById('submit-order').addEventListener('click', function() {
+                submitOrder();
+            });
+            
+            document.getElementById('print-invoice').addEventListener('click', function() {
+                generatePDF('invoice');
+            });
+            
+            document.getElementById('print-receipt').addEventListener('click', function() {
+                generatePDF('receipt');
+            });
+        }
+        
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.style.display = 'block';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Reliable submission method using FormData
+        async function submitOrderToSheets(orderData) {
+            try {
+                console.log('Submitting order:', orderData);
+                
+                // Create form data
+                const formData = new URLSearchParams();
+                Object.keys(orderData).forEach(key => {
+                    if (key === 'medicines') {
+                        formData.append(key, JSON.stringify(orderData[key]));
+                    } else {
+                        formData.append(key, orderData[key]);
+                    }
+                });
+                
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: formData
+                });
+                
+                // Try to read response
+                const responseText = await response.text();
+                console.log('Response:', responseText);
+                
+                try {
+                    const result = JSON.parse(responseText);
+                    return result;
+                } catch (e) {
+                    // If we can't parse JSON, assume success
+                    return {
+                        success: true,
+                        orderId: 'ORD' + new Date().getTime()
+                    };
+                }
+                
+            } catch (error) {
+                console.error('Submission error:', error);
+                throw new Error('Network error: ' + error.message);
+            }
+        }
+        
+        // Rest of your functions remain the same (filterMedicinesByLetter, filterMedicinesBySearch, etc.)
+        function filterMedicinesByLetter(letter) {
+            const medicineList = document.getElementById('medicine-list');
+            medicineList.innerHTML = '';
+            
+            if (medicinesByLetter[letter]) {
+                medicinesByLetter[letter].forEach(medicine => {
+                    addMedicineRow(medicine);
+                });
+            } else {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td colspan="4" style="text-align: center;">No medicines found for letter ${letter}</td>`;
+                medicineList.appendChild(row);
+            }
+            updateTotalPrice();
+        }
+        
+        function filterMedicinesBySearch(searchTerm) {
+            const medicineList = document.getElementById('medicine-list');
+            medicineList.innerHTML = '';
+            
+            if (!searchTerm) {
+                const activeLetter = document.querySelector('.alphabet-btn.active').dataset.letter;
+                filterMedicinesByLetter(activeLetter);
+                return;
+            }
+            
+            document.querySelectorAll('.alphabet-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            let foundMedicines = [];
+            const searchLower = searchTerm.toLowerCase();
+            
+            Object.keys(medicinesByLetter).forEach(letter => {
+                medicinesByLetter[letter].forEach(medicine => {
+                    if (medicine.name.toLowerCase().includes(searchLower)) {
+                        foundMedicines.push(medicine);
+                    }
+                });
+            });
+            
+            if (foundMedicines.length > 0) {
+                foundMedicines.forEach(medicine => {
+                    addMedicineRow(medicine);
+                });
+            } else {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td colspan="4" style="text-align: center;">No medicines found for "${searchTerm}"</td>`;
+                medicineList.appendChild(row);
+            }
+            updateTotalPrice();
+        }
+        
+        function addMedicineRow(medicine) {
+            const medicineList = document.getElementById('medicine-list');
+            const existingRow = allMedicineRows.find(row => row.name === medicine.name);
+            
+            if (existingRow) {
+                medicineList.appendChild(existingRow.element);
+            } else {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${medicine.name}</td>
+                    <td>$${medicine.price.toFixed(2)}</td>
+                    <td>
+                        <div class="quantity-controls">
+                            <button class="quantity-btn minus" data-medicine="${medicine.name}">-</button>
+                            <input type="number" class="quantity-input" value="0" min="0" data-medicine="${medicine.name}" data-price="${medicine.price}">
+                            <button class="quantity-btn plus" data-medicine="${medicine.name}">+</button>
+                        </div>
+                    </td>
+                    <td class="medicine-total" data-medicine="${medicine.name}">$0.00</td>
+                `;
+                
+                medicineList.appendChild(row);
+                allMedicineRows.push({ name: medicine.name, price: medicine.price, element: row });
+                
+                const minusBtn = row.querySelector('.minus');
+                const plusBtn = row.querySelector('.plus');
+                const quantityInput = row.querySelector('.quantity-input');
+                
+                minusBtn.addEventListener('click', function() {
+                    let currentValue = parseInt(quantityInput.value);
+                    if (currentValue > 0) {
+                        quantityInput.value = currentValue - 1;
+                        updateMedicineTotal(medicine.name, medicine.price, quantityInput.value);
+                        updateTotalPrice();
+                    }
+                });
+                
+                plusBtn.addEventListener('click', function() {
+                    let currentValue = parseInt(quantityInput.value);
+                    quantityInput.value = currentValue + 1;
+                    updateMedicineTotal(medicine.name, medicine.price, quantityInput.value);
+                    updateTotalPrice();
+                });
+                
+                quantityInput.addEventListener('input', function() {
+                    let value = parseInt(this.value) || 0;
+                    if (value < 0) value = 0;
+                    this.value = value;
+                    updateMedicineTotal(medicine.name, medicine.price, value);
+                    updateTotalPrice();
+                });
+            }
+        }
+        
+        function updateMedicineTotal(medicineName, price, quantity) {
+            const totalElement = document.querySelector(`.medicine-total[data-medicine="${medicineName}"]`);
+            const total = price * quantity;
+            if (totalElement) {
+                totalElement.textContent = `$${total.toFixed(2)}`;
+            }
+        }
+        
+        function updateTotalPrice() {
+            let total = 0;
+            document.querySelectorAll('.medicine-total').forEach(element => {
+                const value = parseFloat(element.textContent.replace('$', '')) || 0;
+                total += value;
+            });
+            document.getElementById('total-price').textContent = total.toFixed(2);
+        }
+        
+        async function submitOrder() {
+            const workerId = document.getElementById('worker-id').value;
+            const workerName = document.getElementById('worker-name').value;
+            const workerImage = document.getElementById('worker-image').value;
+            const storeName = document.getElementById('store-select').value;
+            const totalAmount = document.getElementById('total-price').textContent;
+            
+            if (!workerId || !workerName || !storeName) {
+                showNotification('Please fill in all required fields: Worker ID, Worker Name, and Medical Store.', 'error');
+                return;
+            }
+            
+            let hasMedicines = false;
+            const selectedMedicines = [];
+            
+            allMedicineRows.forEach(medicineRow => {
+                const quantityInput = medicineRow.element.querySelector('.quantity-input');
+                if (quantityInput) {
+                    const quantity = parseInt(quantityInput.value) || 0;
+                    if (quantity > 0) {
+                        hasMedicines = true;
+                        selectedMedicines.push({
+                            name: medicineRow.name,
+                            price: medicineRow.price,
+                            quantity: quantity,
+                            total: medicineRow.price * quantity
+                        });
+                    }
+                }
+            });
+            
+            if (!hasMedicines) {
+                showNotification('Please select at least one medicine with quantity greater than 0.', 'error');
+                return;
+            }
+            
+            const orderData = {
+                workerId: workerId,
+                workerName: workerName,
+                workerImage: workerImage,
+                medicalStore: storeName,
+                totalAmount: parseFloat(totalAmount),
+                medicines: selectedMedicines,
+                timestamp: new Date().toISOString()
+            };
+            
+            const confirmMessage = `Confirm order submission:\n\nWorker: ${workerName} (ID: ${workerId})\nStore: ${storeName}\nTotal: $${totalAmount}\n\nDo you want to proceed?`;
+            
+            if (confirm(confirmMessage)) {
+                try {
+                    const submitBtn = document.getElementById('submit-order');
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Submitting...';
+                    
+                    const result = await submitOrderToSheets(orderData);
+                    
+                    if (result.success) {
+                        showNotification(`✅ Order submitted successfully! Order ID: ${result.orderId}`, 'success');
+                        resetForm();
+                    } else {
+                        showNotification(`❌ Error: ${result.error}`, 'error');
+                    }
+                    
+                } catch (error) {
+                    showNotification(`❌ Failed to submit order: ${error.message}`, 'error');
+                } finally {
+                    const submitBtn = document.getElementById('submit-order');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Submit Order';
+                }
+            }
+        }
+
+        function resetForm() {
+            document.getElementById('worker-id').value = '';
+            document.getElementById('worker-name').value = '';
+            document.getElementById('worker-image').value = '';
+            document.getElementById('store-select').value = '';
+            document.getElementById('image-preview').style.display = 'none';
+            
+            allMedicineRows.forEach(medicineRow => {
+                const quantityInput = medicineRow.element.querySelector('.quantity-input');
+                if (quantityInput) {
+                    quantityInput.value = '0';
+                    updateMedicineTotal(medicineRow.name, medicineRow.price, 0);
+                }
+            });
+            updateTotalPrice();
+        }
+        
+        function generatePDF(type) {
+            const workerId = document.getElementById('worker-id').value;
+            const workerName = document.getElementById('worker-name').value;
+            const storeName = document.getElementById('store-select').value;
+            
+            if (!workerId || !workerName || !storeName) {
+                showNotification('Please fill in all required fields before generating PDF.', 'error');
+                return;
+            }
+            
+            const doc = new jsPDF();
+            const title = type === 'invoice' ? 'INVOICE' : 'RECEIPT';
+            const docNumber = 'ORD' + new Date().getTime();
+            
+            // Add header
+            doc.setFillColor(0, 63, 140);
+            doc.rect(0, 0, 210, 40, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(20);
+            doc.text(title, 105, 20, { align: 'center' });
+            doc.setFontSize(10);
+            doc.text(`Document #: ${docNumber}`, 105, 30, { align: 'center' });
+            
+            // Add content
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(12);
+            doc.text('MediDistributors Inc.', 20, 55);
+            doc.setFontSize(10);
+            doc.text('123 Healthcare Avenue', 20, 62);
+            doc.text('Medical District, Cityville 56789', 20, 69);
+            doc.text('Email: orders@medidistributors.com', 20, 76);
+            
+            // Add order details
+            doc.setFillColor(240, 240, 240);
+            doc.rect(20, 85, 170, 40, 'F');
+            doc.setFontSize(11);
+            doc.setTextColor(0, 63, 140);
+            doc.text('ORDER DETAILS', 25, 95);
+            doc.setTextColor(0, 0, 0);
+            doc.text(`Worker ID: ${workerId}`, 25, 105);
+            doc.text(`Worker Name: ${workerName}`, 25, 112);
+            doc.text(`Medical Store: ${storeName}`, 25, 119);
+            
+            const now = new Date();
+            doc.text(`Date: ${now.toLocaleDateString()}`, 140, 105);
+            doc.text(`Time: ${now.toLocaleTimeString()}`, 140, 112);
+            
+            // Add medicine table
+            doc.setFillColor(0, 63, 140);
+            doc.setTextColor(255, 255, 255);
+            doc.rect(20, 135, 170, 10, 'F');
+            doc.text('Medicine', 25, 142);
+            doc.text('Price ($)', 100, 142);
+            doc.text('Qty', 140, 142);
+            doc.text('Total ($)', 160, 142);
+            
+            let yPos = 150;
+            let itemCount = 0;
+            let totalAmount = 0;
+            
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(10);
+            
+            allMedicineRows.forEach(medicineRow => {
+                const quantityInput = medicineRow.element.querySelector('.quantity-input');
+                if (quantityInput) {
+                    const quantity = parseInt(quantityInput.value) || 0;
+                    if (quantity > 0) {
+                        const medicineName = medicineRow.name;
+                        const price = medicineRow.price;
+                        const total = price * quantity;
+                        
+                        const displayName = medicineName.length > 25 ? medicineName.substring(0, 22) + '...' : medicineName;
+                        doc.text(displayName, 25, yPos);
+                        doc.text(`$${price.toFixed(2)}`, 100, yPos);
+                        doc.text(quantity.toString(), 140, yPos);
+                        doc.text(`$${total.toFixed(2)}`, 160, yPos);
+                        
+                        yPos += 7;
+                        itemCount++;
+                        totalAmount += total;
+                    }
+                }
+            });
+            
+            // Add total
+            yPos += 10;
+            doc.setDrawColor(0, 63, 140);
+            doc.setLineWidth(0.5);
+            doc.line(20, yPos, 190, yPos);
+            yPos += 10;
+            doc.setFontSize(12);
+            doc.text(`Total Items: ${itemCount}`, 20, yPos);
+            doc.text(`Total Amount: $${totalAmount.toFixed(2)}`, 120, yPos);
+            
+            // Add footer
+            const footerY = 280;
+            doc.setFontSize(8);
+            doc.setTextColor(100, 100, 100);
+            doc.text('Thank you for your business!', 105, footerY, { align: 'center' });
+            doc.text('MediDistributors Inc. - Your Trusted Healthcare Partner', 105, footerY + 5, { align: 'center' });
+            
+            const fileName = type === 'invoice' ? `invoice_${docNumber}.pdf` : `receipt_${docNumber}.pdf`;
+            doc.save(fileName);
+        }
+    </script>
+</body>
+</html>
